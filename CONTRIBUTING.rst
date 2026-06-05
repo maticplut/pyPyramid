@@ -16,14 +16,14 @@ easier to review and less likely to need major re-work or even be rejected.
 The workflow that developers typically use to fix a bug or add enhancements
 is as follows.
 
-* Fork the ``sdypy_template_project`` repo into your account.
+* Fork the ``pyPyramid`` repo into your account.
 
 * Obtain the source by cloning it onto your development machine.
 
   .. code-block:: console
 
-      $ git clone ttps://github.com/sdypy/sdypy_template_project.git
-      $ cd sdypy_template_project
+      $ git clone https://github.com/pyPyramid/pyPyramid.git
+      $ cd pyPyramid
 
 * Create a branch for local development:
 
