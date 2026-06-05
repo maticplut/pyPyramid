@@ -1,6 +1,6 @@
-# Package requirements for users
-numpy>=1.11.0
-scipy>=1.2.0
-matplotlib>=3.0.0
-pyMRAW>=0.2.0
-tqdm>=4.25.0
+numpy>=2.4.6
+matplotlib>=3.10.9
+scipy>=1.17.1
+opencv-python>=4.13.0.92
+tqdm>=4.67.3
+tabulate>=0.10.0

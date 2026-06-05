@@ -3,30 +3,31 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sdypy-template"
-version = "0.1.0"
-authors = [{name = "Janko Slavič et al.", email = "janko.slavic@fs.uni-lj.si"}]
-maintainers = [{name = "Janko Slavič et al.", email = "janko.slavic@fs.uni-lj.si"}]
+name = "pyPyramid"
+version = "0.0.1"
+authors = [{name = "Matic Plut", email = "matic.plut02@gmail.com"}]
+maintainers = [{name = "Matic Plut", email = "matic.plut02@gmail.com"}]
 license = "MIT"
-description = "A template for SDyPy projects."
+description = "A python package implementing image pyramids in DIC algorithm."
 readme = "README.rst"
-keywords = ["sdypy", "template"]
-requires-python = ">=3.10"
+keywords = ["DIC", "image pyramid"]
+requires-python = ">=3.12"
 
 # Dependency management (these must be installed for the package to work)
 dependencies = [
-    "numpy>=1.11.0",
-    "scipy>=1.2.0",
-    "matplotlib>=3.0.0",
-    "pyMRAW>=0.2.0",
-    "tqdm>=4.25.0",
+    "numpy>=2.4.6",
+    "matplotlib>=3.10.9",
+    "scipy>=1.17.1",
+    "opencv-python>=4.13.0.92",
+    "tqdm>=4.67.3",
+    "tabulate>=0.10.0",
 ]
 
 classifiers = [
-    'Development Status :: 5 - Production/Stable',
+    'Development Status :: 1 - Planning',
     'Intended Audience :: Developers',
     'Topic :: Scientific/Engineering',
-    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.12',
     "License :: OSI Approved :: MIT License",
 ]
 
@@ -44,16 +45,16 @@ dev = [
 ]
 
 [project.urls]
-homepage = "https://github.com/sdypy/sdypy_template_project"
-documentation = "https://github.com/sdypy/sdypy_template_project"
-source = "https://github.com/sdypy/sdypy_template_project"
+homepage = "https://github.com/maticplut/pyPyramid"
+documentation = "https://github.com/maticplut/pyPyramid"
+source = "https://github.com/maticplut/pyPyramid"
 
 # Define the files that are included in the wheel
 [tool.hatch.build.targets.wheel]
-include = ["sdypy_template_project/*"]
+include = ["pyPyramid/*"]
 
 # Define the files that are included in the source distribution (tar.gz)
 [tool.hatch.build.targets.sdist]
 include = [
-    "sdypy_template_project/*"
+    "pyPyramid/*"
 ]
