@@ -7,6 +7,8 @@ from tqdm.auto import tqdm
 
 from .pyramid_video import PyramidVideo
 
+import matplotlib.pyplot as plt
+
 
 # ======================================================================
 # Low-level DIC helpers
@@ -121,9 +123,8 @@ def error_image_SSD(reference, current):
 
 def rigid_dic_pyramid_displacement(
     pyramid: PyramidVideo,
-    start_position,
-    n_frame_skip: int = 1,
-):
+    start_position: np.ndarray
+    ):
     """
     Rigid-body DIC with image-pyramid acceleration.
 
@@ -160,22 +161,22 @@ def rigid_dic_pyramid_displacement(
     # Pre-compute level-constant quantities (Jacobian, SD image, Hessian)
     # ------------------------------------------------------------------
     roi_references = []
-    sd_images      = []
-    inv_hessians   = []
+    sd_images = []
+    inv_hessians = []
 
     for i in range(n_levels):
-        reference     = pyramid.video_pyramid[i][0]
-        scale_i       = pyramid.scale[i]
+        reference = pyramid.video_pyramids[i][0]
+        scale_i = pyramid.scales[i]
         window_size_i = pyramid.window_sizes[i]
 
         roi_ref = get_roi_image(reference,
                                 start_position / scale_i,
                                 window_size_i)
-
-        jac            = jacobijan(*roi_ref.shape)
-        grad           = get_gradient(roi_ref)
-        grad_norm      = grad / np.std(roi_ref)        # ZNSSD normalisation
-        sd_img         = steepest_descent_image(jac, grad_norm)
+        
+        jac = jacobijan(*roi_ref.shape)
+        grad = get_gradient(roi_ref)
+        grad_norm = grad / np.std(roi_ref) # ZNSSD normalisation - za pravilno skaliranje
+        sd_img = steepest_descent_image(jac, grad_norm)
         inv_hessians.append(np.linalg.inv(hessian(sd_img)))
         roi_references.append(roi_ref)
         sd_images.append(sd_img)
@@ -187,10 +188,10 @@ def rigid_dic_pyramid_displacement(
     all_iterations = np.array([], dtype=int)
     all_times      = np.array([], dtype=float)
 
-    p    = np.zeros(3, dtype=np.float64)
+    p = np.zeros(3, dtype=np.float64)
     warp = rigid_transform_matrix(p)
 
-    frame_indices = range(0, len(pyramid.video_pyramid[0]), n_frame_skip)
+    frame_indices = range(0, len(pyramid.video_pyramids[0]))
 
     for frame_idx in tqdm(frame_indices, desc='Frames', ncols=None):
 
@@ -200,11 +201,11 @@ def rigid_dic_pyramid_displacement(
         for i in range(n_levels):
             t0 = time.time()
 
-            current_frame = pyramid.video_pyramid[i][frame_idx]
-            roi_ref       = roi_references[i]
-            sd_img        = sd_images[i]
-            inv_H         = inv_hessians[i]
-            scale_i       = float(pyramid.scale[i])
+            current_frame = pyramid.video_pyramids[i][frame_idx]
+            roi_ref = roi_references[i]
+            sd_img = sd_images[i]
+            inv_H = inv_hessians[i]
+            scale_i = float(pyramid.scales[i])
             window_size_i = int(pyramid.window_sizes[i])
 
             h, w = current_frame.shape
@@ -215,7 +216,7 @@ def rigid_dic_pyramid_displacement(
             warp[1, 2] /= scale_i
 
             n_iter = 0
-            err    = 1.0
+            err = 1.0
 
             while err > 1e-5 and n_iter < 4000:
                 xi, yi = coordinate_warp(warp, roi_ref.shape)
@@ -224,16 +225,16 @@ def rigid_dic_pyramid_displacement(
                 xi += start_position[0] / scale_i - window_size_i // 2
                 yi += start_position[1] / scale_i - window_size_i // 2
 
-                warped_roi  = interpolate_image(xi, yi, current_frame,
+                warped_roi = interpolate_image(xi, yi, current_frame,
                                                 roi_ref.shape, spl=spl)
-                err_img     = error_image_ZNSSD(roi_ref, warped_roi)
-                b           = error_vector(err_img, sd_img)
-                dp          = -(inv_H @ b)
-                err         = np.linalg.norm(dp)
-                dp_warp     = rigid_transform_matrix(dp)
-                warp        = warp @ np.linalg.inv(dp_warp)
-                p           = transform_params(warp)
-                n_iter     += 1
+                err_img = error_image_ZNSSD(roi_ref, warped_roi)
+                b = error_vector(err_img, sd_img)
+                dp = -(inv_H @ b)
+                err = np.linalg.norm(dp)
+                dp_warp = rigid_transform_matrix(dp)
+                warp = warp @ np.linalg.inv(dp_warp)
+                p = transform_params(warp)
+                n_iter += 1
 
             # Scale translation back to original resolution
             warp[0, 2] *= scale_i
